@@ -14,6 +14,11 @@ else
 		OS=$ID
 	fi
 
+	# Install Ubuntu Packages
+	if [[ $OS = "ubuntu" ]]; then
+		apt-get install qrencode -y # Installing qrencode package
+	fi
+
 	# Initialize Default Variables
 	readonly WHICH_INTERFACE="wg0"
 	readonly PROFILE_NAME=$3
@@ -39,18 +44,20 @@ else
 
 	# Generate New Config File
 	cat <<END_OF_CONFIG >> profiles/${PROFILE_NAME}/$3.conf 
-"[Interface]
+[Interface]
 Address = $1/24
 PrivateKey = $PEER_KEY_PRIVATE
 DNS = 1.1.1.1
 
 [Peer]
-PublicKey = ${SERVER_KEY_PUBLIC} >> $3.conf
+PublicKey = ${SERVER_KEY_PUBLIC}
 PresharedKey = ${PEER_KEY_PRE_SHARED}
 AllowedIPs = 0.0.0.0/0, ::/0
 Endpoint = $2:51820
 END_OF_CONFIG
 
+	# Generate QR-CODE For Profile
+	qrencode -t ansiutf8 < profiles/${PROFILE_NAME}/${PROFILE_NAME}.conf
 fi
 
 
