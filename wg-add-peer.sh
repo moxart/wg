@@ -58,6 +58,11 @@ END_OF_CONFIG
 
 	# Generate QR-CODE For Profile
 	qrencode -t ansiutf8 < profiles/${PROFILE_NAME}/${PROFILE_NAME}.conf
+	qrencode -o profiles/${PROFILE_NAME}/${PROFILE_NAME}.png < profiles/${PROFILE_NAME}/${PROFILE_NAME}.conf
+
+	# Compress Config Files & Remove Client Directory Files
+	tar czvf profiles/${PROFILE_NAME}.tar.gz profiles/${PROFILE_NAME}
+	rm -rf profiles/${PROFILE_NAME}
 fi
 
 
