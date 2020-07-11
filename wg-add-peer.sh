@@ -16,7 +16,12 @@ else
 
 	# Install Ubuntu Packages
 	if [[ $OS = "ubuntu" ]]; then
-		apt-get install qrencode -y # Installing qrencode package
+		apt-get install -y software-properties-common -y
+		apt-get install linux-headers-$(uname --kernel-release) -y
+		add-apt-repository ppa:wireguard/wireguard -y
+		apt-get update -y
+		apt-get install wireguard -y
+		apt-get install qrencode iptables resolvconf -y 
 	fi
 
 	# Initialize Default Variables
@@ -64,5 +69,3 @@ END_OF_CONFIG
 	tar czvf profiles/${PROFILE_NAME}.tar.gz profiles/${PROFILE_NAME}
 	rm -rf profiles/${PROFILE_NAME}
 fi
-
-
