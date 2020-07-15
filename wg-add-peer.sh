@@ -6,12 +6,16 @@ unset PROFILE_NAME
 unset SERVER_KEY_PUBLIC
 unset ALLOWED_IPS
 unset ENDPOINT
+unset BACKUP_PATH
+unset EMAIL
 
 # Initialize Default Variables
 read -rp 'Which Interface ( wg0 ): ' WHICH_INTERFACE
 read -rp 'Profile Name: ' PROFILE_NAME
 read -rp 'Allowed IPs: ' ALLOWED_IPS
-read -rp 'End Point ( Server Public IP ): ' ENDPOINT
+read -rp 'EndPoint: ' ENDPOINT
+read -rp 'BACKUP_PATH ( /etc/wireguard ): ' BACKUP_PATH
+read -rp 'Email: ' EMAIL
 
 # Check The OS Version
 if [[ -e /etc/debian_version ]]; then
@@ -28,6 +32,7 @@ if [[ $OS = "ubuntu" ]]; then
   apt-get update -y
   apt-get install wireguard -y
   apt-get install qrencode iptables resolvconf -y
+  apt-get install mutt -y
 fi
 
 readonly SERVER_KEY_PUBLIC=$(wg show "${WHICH_INTERFACE:-wg0}" public-key)
@@ -71,3 +76,13 @@ qrencode -o profiles/"${PROFILE_NAME}"/"${PROFILE_NAME}".png < profiles/"${PROFI
 # Compress Config Files & Remove Client Directory Files
 tar czvf profiles/"${PROFILE_NAME}".tar.gz profiles/"${PROFILE_NAME}"
 rm -rf profiles/"${PROFILE_NAME}"
+
+# Backup Files & Sned Them To Your Email
+regex_email="^([A-Za-z]+[A-Za-z0-9]*((\.|\-|\_)?[A-Za-z]+[A-Za-z0-9]*){1,})@(([A-Za-z]+[A-Za-z0-9]*)+((\.|\-|\_)?([A-Za-z]+[A-Za-z0-9]*)+){1,})+\.([A-Za-z]{2,})+$"
+tar czvf "backup-wireguard-$(date +"%d-%m-%Y-%H-%M-%S")".tar.gz --absolute-names "${BACKUP_PATH:-"/etc/wireguard"}"
+if [[ "${EMAIL}" =~ $regex_email ]] ; then
+  echo "Backup of Wireguard" | mutt -a "backup-wireguard-$(date +"%d-%m-%Y-%H-%M-%S").tar.gz" -s "Backup Wireguard" -- ${EMAIL}
+else
+  echo "Warning: Please Provide a Valid Email Address!"
+fi
+
